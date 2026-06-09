@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import './App.css';
 
 import Header from './components/Header';
@@ -8,12 +8,25 @@ function App() {
   const [inputText, setInputText] = useState('');
   const [products, setProducts] = useState([]);
 
-  const callProducts = async (query) => {
-    const res = await fetch(`http://localhost:3333/products?search=${query}`);
-    const data = await res.json();
-    console.log(data);
-    return setProducts(data);
-  };
+  function debounce(callback, delay) {
+    let timer;
+    return (value) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        callback(value);
+      }, delay);
+    };
+  }
+
+  const callProducts = useCallback(
+    debounce(async (query) => {
+      const res = await fetch(`http://localhost:3333/products?search=${query}`);
+      const data = await res.json();
+      console.log(data);
+      return setProducts(data);
+    }, 800),
+    [],
+  );
 
   useEffect(() => {
     if (inputText !== '') {
